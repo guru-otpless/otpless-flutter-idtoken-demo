@@ -1,0 +1,28 @@
+name: otpless_flutter_headless_demo
+description: Reference app showing how to integrate the OTPLESS Headless SDK in Flutter.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # OTPLESS Headless SDK — https://pub.dev/packages/otpless_headless_flutter
+  otpless_headless_flutter: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Demo only: the App ID is read from config/otpless_config.json at runtime.
+  # Created by ./scripts/configure.sh (see README).
+  assets:
+    - config/
