@@ -1,15 +1,26 @@
-# BigBasket — OTPLESS SNA Demo (Flutter)
+# OTPLESS Flutter idToken Demo (SNA)
 
-A BigBasket-specific build of the OTPLESS Flutter Headless demo, focused on
-**Silent Network Authentication (SNA)**:
+A client-ready build of the OTPLESS Flutter Headless demo for customers who
+only need the **`idToken`** after **Silent Network Authentication (SNA)**.
+Configure it with any client's App ID and hand over the APK.
 
 - Phone number login only (SNA first; OTP fallback if SmartAuth is enabled in the dashboard)
 - After verification, the app shows **only the `idToken`** in a read-only field with a **Copy idToken** button
 - No SDK event log, no raw response, and no other tokens on screen
-- Installs alongside the original demo: Android `com.otpless.bigbasket_sna_demo`, iOS `com.otpless.bigbasketSnaDemo`
+- OTP field accepts exactly 6 digits
+- Installs alongside the full demo: Android `com.otpless.idtoken_demo`, iOS `com.otpless.idtokenDemo`
 
-Setup is the same as below: `./scripts/configure.sh <BIGBASKET_APP_ID>`, `flutter pub get`, `flutter run`.
+### Build for a client
+
+```bash
+./scripts/configure.sh <CLIENT_APP_ID>   # writes git-ignored config
+flutter pub get
+flutter build apk --release              # build/app/outputs/flutter-apk/app-release.apk
+```
+
+Rename the APK per client when sharing (e.g. `<Client>-idToken-Demo.apk`).
 For SNA, test on a real device using mobile data with Wi-Fi turned off.
+The release APK is signed with the debug key: fine for demos, not for the Play Store.
 
 ---
 

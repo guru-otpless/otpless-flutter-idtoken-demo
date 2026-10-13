@@ -25,13 +25,13 @@ class OtplessDemoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme(Brightness b) => ThemeData(
           colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF84C225), brightness: b),
+              seedColor: const Color(0xFF4F46E5), brightness: b),
           inputDecorationTheme: const InputDecorationTheme(
               border: OutlineInputBorder()),
         );
 
     return MaterialApp(
-      title: 'BigBasket × OTPLESS',
+      title: 'OTPLESS idToken Demo',
       debugShowCheckedModeBanner: false,
       theme: theme(Brightness.light),
       darkTheme: theme(Brightness.dark),
@@ -86,7 +86,7 @@ class _AuthShellState extends State<AuthShell> {
           },
           child: Scaffold(
             appBar: AppBar(
-              title: const Text('BigBasket × OTPLESS'),
+              title: const Text('OTPLESS idToken Demo'),
               leading: inFlow
                   ? BackButton(onPressed: _controller.reset)
                   : null,
