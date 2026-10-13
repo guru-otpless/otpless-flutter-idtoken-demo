@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../otpless/otpless_service.dart';
-import 'event_log_sheet.dart';
 
 /// Red banner for SDK / validation errors.
 class ErrorBanner extends StatelessWidget {
@@ -94,19 +93,6 @@ class SdkStatusChip extends StatelessWidget {
           label: Text(ready ? 'SDK ready' : 'Initializing'),
         );
       },
-    );
-  }
-}
-
-class EventLogButton extends StatelessWidget {
-  const EventLogButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: 'SDK event log',
-      icon: const Icon(Icons.receipt_long_outlined),
-      onPressed: () => EventLogSheet.show(context),
     );
   }
 }

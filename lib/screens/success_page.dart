@@ -1,34 +1,22 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../auth/auth_controller.dart';
-import '../otpless/otpless_service.dart';
 
-/// Step 3: ONETAP received.
+/// Step 3: ONETAP received. Shows only the idToken, with a copy button.
 ///
-/// IMPORTANT: the token is only proof that the user *claims* to be verified.
-/// Send it to your backend and validate it with the OTPLESS server-side API
-/// before creating a session. Never trust it on the client alone.
-class SuccessPage extends StatefulWidget {
+/// IMPORTANT: send the idToken to your backend and validate it with the
+/// OTPLESS server-side API before creating a session. Never trust it on the
+/// client alone.
+class SuccessPage extends StatelessWidget {
   const SuccessPage({super.key, required this.controller});
 
   final AuthController controller;
 
   @override
-  State<SuccessPage> createState() => _SuccessPageState();
-}
-
-class _SuccessPageState extends State<SuccessPage> {
-  bool _reveal = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final result = widget.controller.result;
-    final token = result?.token;
-    final idToken = result?.idToken;
+    final idToken = controller.result?.idToken;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -37,54 +25,26 @@ class _SuccessPageState extends State<SuccessPage> {
         children: [
           Icon(Icons.verified_rounded, size: 72, color: Colors.green.shade600),
           const SizedBox(height: 16),
-          Text('Signed in',
+          Text('Verified',
               textAlign: TextAlign.center,
               style: theme.textTheme.headlineMedium),
           const SizedBox(height: 4),
-          Text(widget.controller.identity?.display ?? '',
+          Text(controller.identity?.display ?? '',
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium),
-          const SizedBox(height: 24),
-          Card(
-            color: theme.colorScheme.tertiaryContainer,
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Next step in your app: send the token below to your backend '
-                'and verify it with the OTPLESS server-side token validation '
-                'API. Create the user session only after that succeeds.',
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          if (token != null)
-            _TokenTile(label: 'token', value: token, reveal: _reveal),
+          const SizedBox(height: 32),
           if (idToken != null)
-            _TokenTile(label: 'idToken', value: idToken, reveal: _reveal),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Show tokens'),
-            value: _reveal,
-            onChanged: (v) => setState(() => _reveal = v),
-          ),
-          ExpansionTile(
-            tilePadding: EdgeInsets.zero,
-            title: const Text('ONETAP response (redacted)'),
-            children: [
-              SelectableText(
-                const JsonEncoder.withIndent('  ')
-                    .convert(OtplessService.redact(result?.raw ?? {})),
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(fontFamily: 'monospace'),
-              ),
-            ],
-          ),
+            _IdTokenField(idToken)
+          else
+            Text('No idToken was returned in the response.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: theme.colorScheme.error)),
           const SizedBox(height: 24),
           FilledButton.tonal(
             style:
                 FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-            onPressed: widget.controller.reset,
-            child: const Text('Sign out & try again'),
+            onPressed: controller.reset,
+            child: const Text('Try again'),
           ),
         ],
       ),
@@ -92,37 +52,38 @@ class _SuccessPageState extends State<SuccessPage> {
   }
 }
 
-class _TokenTile extends StatelessWidget {
-  const _TokenTile({
-    required this.label,
-    required this.value,
-    required this.reveal,
-  });
+class _IdTokenField extends StatelessWidget {
+  const _IdTokenField(this.idToken);
 
-  final String label;
-  final String value;
-  final bool reveal;
+  final String idToken;
+
+  void _copy(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: idToken));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('idToken copied')));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final shown = reveal
-        ? value
-        : '${value.substring(0, value.length.clamp(0, 6))}••••••••';
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: Text(shown,
-          maxLines: reveal ? null : 1,
-          style: const TextStyle(fontFamily: 'monospace')),
-      trailing: IconButton(
-        tooltip: 'Copy',
-        icon: const Icon(Icons.copy),
-        onPressed: () {
-          Clipboard.setData(ClipboardData(text: value));
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('$label copied')));
-        },
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextFormField(
+          initialValue: idToken,
+          readOnly: true,
+          minLines: 3,
+          maxLines: 8,
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+          decoration: const InputDecoration(labelText: 'idToken'),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+          onPressed: () => _copy(context),
+          icon: const Icon(Icons.copy),
+          label: const Text('Copy idToken'),
+        ),
+      ],
     );
   }
 }

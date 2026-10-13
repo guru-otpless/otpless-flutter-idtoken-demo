@@ -1,3 +1,18 @@
+# BigBasket — OTPLESS SNA Demo (Flutter)
+
+A BigBasket-specific build of the OTPLESS Flutter Headless demo, focused on
+**Silent Network Authentication (SNA)**:
+
+- Phone number login only (SNA first; OTP fallback if SmartAuth is enabled in the dashboard)
+- After verification, the app shows **only the `idToken`** in a read-only field with a **Copy idToken** button
+- No SDK event log, no raw response, and no other tokens on screen
+- Installs alongside the original demo: Android `com.otpless.bigbasket_sna_demo`, iOS `com.otpless.bigbasketSnaDemo`
+
+Setup is the same as below: `./scripts/configure.sh <BIGBASKET_APP_ID>`, `flutter pub get`, `flutter run`.
+For SNA, test on a real device using mobile data with Wi-Fi turned off.
+
+---
+
 # OTPLESS Flutter Headless SDK — Demo App
 
 A reference Flutter app showing how to integrate the **OTPLESS Headless SDK**

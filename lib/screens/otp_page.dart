@@ -18,6 +18,7 @@ class OtpPage extends StatefulWidget {
 }
 
 class _OtpPageState extends State<OtpPage> {
+  static const _otpLength = 6;
   static const _resendAfter = Duration(seconds: 30);
 
   final _otp = TextEditingController();
@@ -46,7 +47,10 @@ class _OtpPageState extends State<OtpPage> {
     final otp = _c.autoReadOtp;
     if (otp != null && otp != _handledAutoReadOtp) {
       _handledAutoReadOtp = otp;
-      _otp.text = otp;
+      final digits = otp.replaceAll(RegExp(r'\D'), '');
+      _otp.text = digits.length > _otpLength
+          ? digits.substring(0, _otpLength)
+          : digits;
       // Defer so we don't start a request from inside notifyListeners.
       scheduleMicrotask(_verify);
     }
@@ -64,7 +68,7 @@ class _OtpPageState extends State<OtpPage> {
   void _verify() {
     if (!mounted) return;
     final otp = _otp.text.trim();
-    if (otp.length < 4) return;
+    if (otp.length != _otpLength) return;
     FocusScope.of(context).unfocus();
     _c.verifyOtp(otp);
   }
@@ -85,12 +89,17 @@ class _OtpPageState extends State<OtpPage> {
         children: [
           Text('Enter OTP', style: theme.textTheme.headlineMedium),
           const SizedBox(height: 8),
-          Text.rich(TextSpan(children: [
-            const TextSpan(text: 'Sent to '),
+          Text.rich(
             TextSpan(
-                text: _c.identity?.display ?? '',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-          ])),
+              children: [
+                const TextSpan(text: 'Sent to '),
+                TextSpan(
+                  text: _c.identity?.display ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           if (_c.error != null) ...[
             ErrorBanner(_c.error!),
@@ -105,11 +114,21 @@ class _OtpPageState extends State<OtpPage> {
             autofillHints: const [AutofillHints.oneTimeCode],
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(6),
+              // Enforced: on Android the default lets extra digits through
+              // while the keyboard is composing.
+              LengthLimitingTextInputFormatter(
+                _otpLength,
+                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              ),
             ],
+            maxLength: _otpLength,
+            maxLengthEnforcement: MaxLengthEnforcement.enforced,
             textAlign: TextAlign.center,
             style: theme.textTheme.headlineSmall?.copyWith(letterSpacing: 12),
-            decoration: const InputDecoration(hintText: '••••••'),
+            decoration: const InputDecoration(
+              hintText: '••••••',
+              counterText: '',
+            ),
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => _verify(),
           ),
@@ -119,18 +138,22 @@ class _OtpPageState extends State<OtpPage> {
           BusyButton(
             label: 'Verify',
             busy: _c.busy,
-            onPressed: _otp.text.length >= 4 ? _verify : null,
+            onPressed: _otp.text.length == _otpLength ? _verify : null,
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: _secondsLeft > 0 || _c.busy ? null : _resend,
-            child: Text(_secondsLeft > 0
-                ? 'Resend OTP in ${_secondsLeft}s'
-                : 'Resend OTP'),
+            child: Text(
+              _secondsLeft > 0
+                  ? 'Resend OTP in ${_secondsLeft}s'
+                  : 'Resend OTP',
+            ),
           ),
           TextButton(
             onPressed: _c.reset,
-            child: Text('Change ${_c.identity is EmailIdentity ? 'email' : 'number'}'),
+            child: Text(
+              'Change ${_c.identity is EmailIdentity ? 'email' : 'number'}',
+            ),
           ),
         ],
       ),
